@@ -1,0 +1,43 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: Build Java Application
+      run: |
+        mkdir -p build/classes
+        javac -d build/classes src/main/java/com/healthcare/*.java src/main/java/com/healthcare/models/*.java src/main/java/com/healthcare/blockchain/*.java src/main/java/com/healthcare/services/*.java src/main/java/com/healthcare/utils/*.java src/main/java/com/healthcare/ui/*.java
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./web
+        
+    - name: Upload Java Build
+      uses: actions/upload-artifact@v3
+      with:
+        name: java-build
+        path: build/
